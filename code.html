@@ -1,0 +1,1528 @@
+<!DOCTYPE html>
+<html class="scroll-smooth" lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>AgentGuard — Runtime Security Layer for Autonomous AI Agents</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com" rel="preconnect"/>
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            bgDark: '#050204',
+            cardDark: '#121012',
+            hotPink: '#FF1F6B',
+            deepCrimson: '#B0004A',
+            darkWine: '#3A0620',
+            wirePink: '#FF2D7A',
+            mutedPink: '#B9A9B1',
+            allowGreen: '#3DDC97',
+            askAmber: '#FFBD6B',
+            blockRed: '#FF1F6B',
+          },
+          animation: {
+            'spin-slow': 'spin 40s linear infinite',
+            'spin-reverse-slow': 'spinReverse 45s linear infinite',
+            'float-slow': 'float 5.5s ease-in-out infinite',
+            'float-delayed': 'float 6.2s ease-in-out 1.8s infinite',
+            'pulse-glow': 'pulseGlow 4s ease-in-out infinite',
+            'marquee': 'marquee 28s linear infinite',
+            'shimmer-slow': 'shimmerSweep 6s ease-in-out infinite',
+            'flow-beam': 'beamFlow 2s linear infinite',
+            'badge-shine': 'badgeShine 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'blink': 'cursorBlink 1s step-end infinite',
+          },
+          keyframes: {
+            spinReverse: {
+              '0%': { transform: 'rotate(360deg)' },
+              '100%': { transform: 'rotate(0deg)' },
+            },
+            float: {
+              '0%, 100%': { transform: 'translateY(0px)' },
+              '50%': { transform: 'translateY(-10px)' },
+            },
+            pulseGlow: {
+              '0%, 100%': { opacity: '0.4', transform: 'scale(1)' },
+              '50%': { opacity: '0.7', transform: 'scale(1.05)' },
+            },
+            marquee: {
+              '0%': { transform: 'translateX(0%)' },
+              '100%': { transform: 'translateX(-50%)' },
+            },
+            shimmerSweep: {
+              '0%': { backgroundPosition: '-200% center' },
+              '100%': { backgroundPosition: '200% center' },
+            },
+            beamFlow: {
+              '0%': { transform: 'translateX(-100%)' },
+              '100%': { transform: 'translateX(200%)' },
+            },
+            badgeShine: {
+              '0%': { transform: 'translateX(-150%) skewX(-20deg)' },
+              '25%, 100%': { transform: 'translateX(250%) skewX(-20deg)' },
+            },
+            cursorBlink: {
+              '0%, 100%': { opacity: '1' },
+              '50%': { opacity: '0' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @media (prefers-reduced-motion: reduce) {
+      *, ::before, ::after {
+        animation-delay: -1ms !important;
+        animation-duration: 1ms !important;
+        animation-iteration-count: 1 !important;
+        background-attachment: initial !important;
+        scroll-behavior: auto !important;
+        transition-duration: 0s !important;
+        transition-delay: 0s !important;
+      }
+      .reveal-on-scroll {
+        opacity: 1 !important;
+        transform: none !important;
+      }
+    }
+
+    body {
+      background-color: #050204;
+      color: #FFFFFF;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      overflow-x: hidden;
+    }
+
+    .bg-mesh-glow {
+      background-image: 
+        radial-gradient(ellipse at 50% 0%, rgba(255, 20, 100, 0.38), transparent 55%),
+        radial-gradient(ellipse at 100% 60%, rgba(160, 0, 60, 0.45), transparent 50%),
+        radial-gradient(ellipse at 0% 40%, rgba(120, 0, 50, 0.4), transparent 50%);
+      background-attachment: fixed;
+    }
+
+    .spotlight-card {
+      position: relative;
+      background: rgba(18, 16, 18, 0.72);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      transition: border-color 0.4s ease, box-shadow 0.4s ease, transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .spotlight-card:hover {
+      border-color: rgba(255, 31, 107, 0.45);
+      box-shadow: 0 14px 34px -8px rgba(255, 31, 107, 0.28);
+      transform: translateY(-3px);
+    }
+
+    .pink-glow-btn {
+      box-shadow: 0 0 24px -2px rgba(255, 31, 107, 0.6);
+      transition: all 0.25s ease;
+    }
+    .pink-glow-btn:hover {
+      box-shadow: 0 0 35px 2px rgba(255, 31, 107, 0.85);
+      transform: translateY(-1px);
+    }
+
+    .hero-gradient-text {
+      background: linear-gradient(90deg, #FFFFFF 0%, #FFB3D1 25%, #FF1F6B 50%, #FFB3D1 75%, #FFFFFF 100%);
+      background-size: 250% 100%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: shimmerSweep 7s linear infinite;
+    }
+
+    .crimson-gradient-text {
+      background: linear-gradient(135deg, #FF94BE 0%, #FF1F6B 35%, #B0004A 70%, #FF6EA7 100%);
+      background-size: 250% 250%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: shimmerSweep 8s ease infinite;
+    }
+
+    .shimmer-pill {
+      position: relative;
+      overflow: hidden;
+    }
+    .shimmer-pill::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 40%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.22), transparent);
+      animation: badgeShine 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+      pointer-events: none;
+    }
+
+    .reveal-on-scroll {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1), transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
+      will-change: opacity, transform;
+    }
+
+    .reveal-on-scroll.revealed {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .delay-100 { transition-delay: 100ms; }
+    .delay-200 { transition-delay: 200ms; }
+    .delay-300 { transition-delay: 300ms; }
+    .delay-400 { transition-delay: 400ms; }
+
+    @keyframes heroFadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(22px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .hero-animate-1 { animation: heroFadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both; }
+    .hero-animate-2 { animation: heroFadeUp 0.85s cubic-bezier(0.16, 1, 0.3, 1) 0.25s both; }
+    .hero-animate-3 { animation: heroFadeUp 0.85s cubic-bezier(0.16, 1, 0.3, 1) 0.4s both; }
+    .hero-animate-4 { animation: heroFadeUp 0.85s cubic-bezier(0.16, 1, 0.3, 1) 0.55s both; }
+    .hero-animate-cards { animation: heroFadeUp 1s cubic-bezier(0.16, 1, 0.3, 1) 0.7s both; }
+
+    @keyframes headerSlideDown {
+      from { opacity: 0; transform: translateY(-100%); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-header-enter {
+      animation: headerSlideDown 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    .pipeline-connector {
+      position: relative;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    .pipeline-connector::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 45%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, #FF1F6B, #FFFFFF, transparent);
+      animation: beamFlow 1.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    }
+
+    @keyframes beamFlowVertical {
+      0% { transform: translateY(-100%); }
+      100% { transform: translateY(200%); }
+    }
+    .pipeline-connector-vertical {
+      position: relative;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    .pipeline-connector-vertical::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 45%;
+      background: linear-gradient(180deg, transparent, #FF1F6B, #FFFFFF, transparent);
+      animation: beamFlowVertical 1.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    }
+
+    .quote-glow-border {
+      position: relative;
+    }
+    .quote-glow-border::before {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      border-radius: 1rem;
+      padding: 1px;
+      background: linear-gradient(90deg, rgba(255,31,107,0.1), rgba(255,31,107,0.8), rgba(255,45,122,0.2));
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      animation: shimmerSweep 6s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    @keyframes screenShake {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-7px) rotate(-0.5deg); }
+      40% { transform: translateX(7px) rotate(0.5deg); }
+      60% { transform: translateX(-5px); }
+      80% { transform: translateX(4px); }
+    }
+    .shake-active {
+      animation: screenShake 0.45s cubic-bezier(.36,.07,.19,.97) both;
+    }
+
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #050204; }
+    ::-webkit-scrollbar-thumb { background: #2a111c; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #FF1F6B; }
+  </style>
+</head>
+<body class="bg-mesh-glow relative min-h-screen text-slate-100 antialiased selection:bg-[#FF1F6B] selection:text-white">
+
+<!-- Ambient Background Spirograph Swirls -->
+<div class="fixed inset-0 pointer-events-none overflow-hidden z-0">
+  <div class="absolute -top-[12%] -right-[8%] w-[950px] h-[950px] animate-spin-slow opacity-45">
+    <svg class="w-full h-full fill-none stroke-[#FF2D7A]" stroke-width="0.85" viewbox="0 0 800 800">
+      <defs>
+        <linearGradient id="swirlGrad1" x1="0%" x2="100%" y1="0%" y2="100%">
+          <stop offset="0%" stop-color="#FF1F6B" stop-opacity="0.65"></stop>
+          <stop offset="50%" stop-color="#B0004A" stop-opacity="0.3"></stop>
+          <stop offset="100%" stop-color="#3A0620" stop-opacity="0.05"></stop>
+        </linearGradient>
+      </defs>
+      <g stroke="url(#swirlGrad1)">
+        <ellipse cx="400" cy="400" rx="360" ry="140" transform="rotate(0 400 400)"></ellipse>
+        <ellipse cx="400" cy="400" rx="360" ry="140" transform="rotate(15 400 400)"></ellipse>
+        <ellipse cx="400" cy="400" rx="360" ry="140" transform="rotate(30 400 400)"></ellipse>
+        <ellipse cx="400" cy="400" rx="360" ry="140" transform="rotate(45 400 400)"></ellipse>
+        <ellipse cx="400" cy="400" rx="360" ry="140" transform="rotate(60 400 400)"></ellipse>
+        <ellipse cx="400" cy="400" rx="360" ry="140" transform="rotate(75 400 400)"></ellipse>
+        <ellipse cx="400" cy="400" rx="360" ry="140" transform="rotate(90 400 400)"></ellipse>
+        <ellipse cx="400" cy="400" rx="360" ry="140" transform="rotate(105 400 400)"></ellipse>
+        <ellipse cx="400" cy="400" rx="360" ry="140" transform="rotate(120 400 400)"></ellipse>
+        <ellipse cx="400" cy="400" rx="360" ry="140" transform="rotate(135 400 400)"></ellipse>
+        <ellipse cx="400" cy="400" rx="360" ry="140" transform="rotate(150 400 400)"></ellipse>
+        <ellipse cx="400" cy="400" rx="360" ry="140" transform="rotate(165 400 400)"></ellipse>
+      </g>
+      <circle cx="400" cy="400" fill="#050204" r="95" stroke="#FF1F6B" stroke-opacity="0.35" stroke-width="1.2"></circle>
+    </svg>
+  </div>
+  <div class="absolute -bottom-[20%] -left-[15%] w-[1000px] h-[1000px] animate-spin-reverse-slow opacity-35">
+    <svg class="w-full h-full fill-none stroke-[#FF2D7A]" stroke-width="0.8" viewbox="0 0 800 800">
+      <g stroke="rgba(255, 45, 122, 0.35)">
+        <ellipse cx="400" cy="400" rx="380" ry="110" transform="rotate(15 400 400)"></ellipse>
+        <ellipse cx="400" cy="400" rx="380" ry="110" transform="rotate(45 400 400)"></ellipse>
+        <ellipse cx="400" cy="400" rx="380" ry="110" transform="rotate(75 400 400)"></ellipse>
+        <ellipse cx="400" cy="400" rx="380" ry="110" transform="rotate(105 400 400)"></ellipse>
+        <ellipse cx="400" cy="400" rx="380" ry="110" transform="rotate(135 400 400)"></ellipse>
+        <ellipse cx="400" cy="400" rx="380" ry="110" transform="rotate(165 400 400)"></ellipse>
+      </g>
+      <circle cx="400" cy="400" fill="#050204" r="110" stroke="#B0004A" stroke-opacity="0.3" stroke-width="1"></circle>
+    </svg>
+  </div>
+</div>
+
+<!-- Header / Navigation -->
+<header class="sticky top-0 z-50 backdrop-blur-xl bg-[#050204]/80 border-b border-white/[0.08] transition-all duration-300 animate-header-enter">
+  <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+    <a class="flex items-center gap-2.5 group" href="#">
+      <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-[#FF1F6B] via-[#B0004A] to-[#FF2D7A] p-[1px] flex items-center justify-center shadow-[0_0_15px_rgba(255,31,107,0.4)] group-hover:shadow-[0_0_22px_rgba(255,31,107,0.7)] transition-shadow duration-300">
+        <div class="w-full h-full bg-[#0d090c] rounded-[7px] flex items-center justify-center">
+          <svg class="w-4 h-4 text-[#FF1F6B] group-hover:scale-110 transition-transform duration-200" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+            <path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2"></path>
+          </svg>
+        </div>
+      </div>
+      <div class="flex items-center">
+        <span class="font-extrabold text-lg tracking-tight text-white group-hover:text-white/90">Agent</span>
+        <span class="font-extrabold text-lg tracking-tight text-[#FF1F6B] group-hover:drop-shadow-[0_0_8px_rgba(255,31,107,0.6)] transition-all">Guard</span>
+        <span class="ml-2 px-1.5 py-0.5 text-[10px] font-mono tracking-wider font-semibold rounded bg-white/10 text-[#FFB3D1] border border-white/10">v2.4</span>
+      </div>
+    </a>
+    <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-[#B9A9B1]">
+      <a class="hover:text-white transition-colors duration-150" href="#hero">Home</a>
+      <a class="hover:text-white transition-colors duration-150" href="#pipeline">Features</a>
+      <a class="hover:text-white transition-colors duration-150" href="#engine">How it works</a>
+      <a class="hover:text-[#FF1F6B] transition-colors duration-150 flex items-center gap-1.5" href="#demo">
+        <span class="w-1.5 h-1.5 rounded-full bg-[#FF1F6B] animate-pulse"></span>
+        Live Demo
+      </a>
+      <a class="hover:text-white transition-colors duration-150" href="#dashboard">Dashboard</a>
+      <a class="hover:text-white transition-colors duration-150" href="#architecture">Architecture</a>
+    </nav>
+    <div class="flex items-center gap-3">
+      <a class="hidden sm:inline-flex px-4 py-2 text-xs font-semibold rounded-full border border-white/15 text-white/80 hover:text-white hover:border-[#FF1F6B]/50 transition-all hover:scale-105 active:scale-95" href="#demo">Sign In</a>
+      <a class="pink-glow-btn px-5 py-2.5 text-xs font-bold rounded-full bg-[#FF1F6B] text-white hover:bg-[#ff367c] flex items-center gap-2 hover:scale-105 active:scale-95 transition-all" href="#demo">
+        <span>Try Live Demo</span>
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M14 5l7 7m0 0l-7 7m7-7H3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+      </a>
+    </div>
+  </div>
+</header>
+
+<!-- Hero Section with Page Entrance & Text Stagger Animations -->
+<section class="relative z-10 pt-16 pb-20 md:pt-24 md:pb-28 max-w-7xl mx-auto px-6" id="hero">
+  <div class="relative flex flex-col items-center text-center">
+    <!-- Animated Pill Badge -->
+    <div class="hero-animate-1 shimmer-pill inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#1A0E15] border border-[#FF1F6B]/30 mb-8 backdrop-blur-md shadow-[0_0_20px_rgba(255,31,107,0.25)] hover:border-[#FF1F6B]/60 transition-all cursor-default">
+      <span class="px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider rounded-full bg-[#FF1F6B] text-white shadow-[0_0_10px_rgba(255,31,107,0.5)]">New</span>
+      <span class="text-xs font-medium text-[#FFB3D1]">Interactive live sandbox now available</span>
+      <svg class="w-3.5 h-3.5 text-[#FF1F6B] animate-pulse" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+    </div>
+
+    <!-- Main Headline with Staggered Entrance & Gradient Shimmer -->
+    <h1 class="hero-animate-2 text-4xl sm:text-5xl md:text-7xl font-extrabold tracking-tight max-w-4xl leading-[1.08] mb-6">
+      The Safety Layer Your AI Agents <br class="hidden sm:block"/>
+      <span class="hero-gradient-text inline-block">Never Knew They Needed.</span>
+    </h1>
+
+    <p class="hero-animate-3 max-w-2xl text-base sm:text-lg text-[#B9A9B1] leading-relaxed mb-10">
+      AgentGuard checks every high-impact action before damage happens. <br class="hidden sm:inline"/>
+      <span class="text-white font-medium">Silent when safe.</span>
+      <span class="text-[#FFBD6B] font-medium"> Explainable when risky.</span>
+      <span class="text-[#FF1F6B] font-medium"> Protective when critical.</span>
+    </p>
+
+    <div class="hero-animate-4 flex flex-wrap items-center justify-center gap-4 mb-16">
+      <a class="pink-glow-btn px-8 py-3.5 rounded-full bg-[#FF1F6B] hover:bg-[#ff367c] text-white font-bold text-sm tracking-wide flex items-center gap-2.5 transition-transform hover:scale-105 active:scale-95" href="#demo">
+        <svg class="w-4 h-4 fill-current" viewbox="0 0 24 24"><path d="M8 5v14l11-7z"></path></svg>
+        <span>Watch Live Demo</span>
+      </a>
+      <a class="px-8 py-3.5 rounded-full border border-[#FF1F6B]/60 hover:border-[#FF1F6B] text-white hover:text-white bg-transparent hover:bg-[#FF1F6B]/10 transition-all text-sm font-semibold tracking-wide hover:scale-105 active:scale-95" href="#pipeline">
+        How it works
+      </a>
+    </div>
+
+    <!-- Floating Glass Telemetry Cards -->
+    <div class="hero-animate-cards w-full grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl items-center relative">
+      <div class="spotlight-card rounded-2xl p-5 md:animate-float-slow text-left shadow-2xl relative overflow-hidden group">
+        <div class="flex items-center justify-between mb-4">
+          <span class="text-xs font-semibold text-white/50 tracking-wider uppercase font-mono">Realtime Intercepts</span>
+          <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono font-medium text-emerald-400 bg-emerald-500/10 border border-emerald-500/20">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Active
+          </span>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div class="p-3 rounded-xl bg-black/40 border border-white/[0.06] hover:border-emerald-500/30 transition-colors">
+            <div class="text-[11px] text-[#B9A9B1] mb-1 flex items-center gap-1.5 font-medium">
+              <span class="w-2 h-2 rounded-full bg-[#3DDC97]"></span> Allowed
+            </div>
+            <div class="text-2xl font-bold text-white tracking-tight counter-value" data-target="1284">0</div>
+            <div class="text-[10px] text-emerald-400 mt-1 font-mono">97.2% passed</div>
+          </div>
+          <div class="p-3 rounded-xl bg-black/40 border border-[#FF1F6B]/25 hover:border-[#FF1F6B]/50 transition-colors">
+            <div class="text-[11px] text-[#B9A9B1] mb-1 flex items-center gap-1.5 font-medium">
+              <span class="w-2 h-2 rounded-full bg-[#FF1F6B]"></span> Blocked
+            </div>
+            <div class="text-2xl font-bold text-[#FF1F6B] tracking-tight counter-value" data-target="37">0</div>
+            <div class="text-[10px] text-rose-400 mt-1 font-mono">0 breaches</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="spotlight-card rounded-2xl p-5 md:animate-float-delayed text-left shadow-2xl border-[#FF1F6B]/20 relative">
+        <div class="flex items-center justify-between mb-2">
+          <div>
+            <div class="text-xs font-semibold text-white">Risk Over Time</div>
+            <div class="text-[11px] text-[#B9A9B1]">Autonomous Execution Audit (24h)</div>
+          </div>
+          <div class="px-2.5 py-1 rounded-md bg-[#FF1F6B]/20 border border-[#FF1F6B]/40 text-[#FF1F6B] text-[10px] font-mono font-bold flex items-center gap-1 shadow-[0_0_10px_rgba(255,31,107,0.3)] animate-pulse">
+            <span class="w-1.5 h-1.5 rounded-full bg-[#FF1F6B]"></span>
+            <span>92 BLOCKED</span>
+          </div>
+        </div>
+        <div class="relative h-28 w-full mt-2">
+          <svg class="w-full h-full overflow-visible" viewbox="0 0 300 100">
+            <defs>
+              <linearGradient id="areaPinkGrad" x1="0%" x2="0%" y1="0%" y2="1">
+                <stop offset="0%" stop-color="#FF1F6B" stop-opacity="0.55"></stop>
+                <stop offset="100%" stop-color="#FF1F6B" stop-opacity="0.0"></stop>
+              </linearGradient>
+            </defs>
+            <line stroke="rgba(255,255,255,0.06)" stroke-dasharray="3 3" x1="0" x2="300" y1="25" y2="25"></line>
+            <line stroke="rgba(255,255,255,0.06)" stroke-dasharray="3 3" x1="0" x2="300" y1="65" y2="65"></line>
+            <path d="M0,80 Q35,70 70,60 T140,45 T190,65 T240,20 T300,50 L300,95 L0,95 Z" fill="url(#areaPinkGrad)"></path>
+            <path d="M0,80 Q35,70 70,60 T140,45 T190,65 T240,20 T300,50" fill="none" stroke="#FF1F6B" stroke-width="2.5"></path>
+            <circle cx="240" cy="20" fill="#FFFFFF" r="5" stroke="#FF1F6B" stroke-width="3"></circle>
+            <circle class="animate-ping" cx="240" cy="20" fill="#FF1F6B" opacity="0.3" r="10"></circle>
+          </svg>
+          <div class="absolute right-12 top-0 px-2 py-0.5 rounded bg-black/90 border border-[#FF1F6B] text-[9px] font-mono text-[#FFB3D1]">
+            Severity: 92/100
+          </div>
+        </div>
+        <div class="flex justify-between items-center text-[10px] text-white/40 font-mono mt-1 pt-1 border-t border-white/[0.05]">
+          <span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span><span>Now</span>
+        </div>
+      </div>
+
+      <div class="spotlight-card rounded-2xl p-5 md:animate-float-slow text-left shadow-2xl relative overflow-hidden">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-xs font-semibold text-white/50 uppercase font-mono tracking-wider">Policy Engine</span>
+          <button class="w-6 h-6 rounded-full bg-[#FF1F6B]/20 text-[#FF1F6B] flex items-center justify-center hover:bg-[#FF1F6B] hover:text-white transition-colors" title="Engine Settings">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M12 6v6m0 0v6m0-6h6m-6 0H6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+          </button>
+        </div>
+        <div class="flex items-center gap-4">
+          <div class="relative w-20 h-20 flex-shrink-0 flex items-center justify-center">
+            <svg class="w-20 h-20 transform -rotate-90">
+              <circle cx="40" cy="40" fill="transparent" r="32" stroke="rgba(255,255,255,0.08)" stroke-width="6"></circle>
+              <circle class="transition-all duration-1000" cx="40" cy="40" fill="transparent" r="32" stroke="#FF1F6B" stroke-dasharray="201.06" stroke-dashoffset="64.3" stroke-linecap="round" stroke-width="6"></circle>
+            </svg>
+            <span class="absolute font-mono font-extrabold text-lg text-white">68%</span>
+          </div>
+          <div>
+            <div class="text-sm font-bold text-white leading-tight">Policy Coverage</div>
+            <div class="text-xs text-[#B9A9B1] mt-1">24 Active Rules</div>
+            <div class="inline-block mt-2 text-[10px] font-mono text-[#3DDC97] bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+              +14% this week
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tech Marquee -->
+    <div class="mt-20 w-full overflow-hidden border-t border-b border-white/[0.08] py-5 bg-[#080306]/70 backdrop-blur-sm reveal-on-scroll">
+      <div class="text-xs font-mono uppercase tracking-widest text-white/40 mb-3 text-center">
+        Built for teams running autonomous agents
+      </div>
+      <div class="flex overflow-hidden relative w-full">
+        <div class="flex items-center gap-8 whitespace-nowrap animate-marquee">
+          <span class="flex items-center gap-2 text-sm font-mono text-white/80 bg-white/[0.03] px-4 py-1.5 rounded-full border border-white/[0.08] hover:border-[#FF1F6B]/50 transition-colors"><span class="text-[#FF1F6B]">⚡</span> FastAPI</span>
+          <span class="text-[#FF2D7A]/50">✦</span>
+          <span class="flex items-center gap-2 text-sm font-mono text-white/80 bg-white/[0.03] px-4 py-1.5 rounded-full border border-white/[0.08] hover:border-[#FF1F6B]/50 transition-colors"><span class="text-[#FF1F6B]">⚛</span> React 19</span>
+          <span class="text-[#FF2D7A]/50">✦</span>
+          <span class="flex items-center gap-2 text-sm font-mono text-white/80 bg-white/[0.03] px-4 py-1.5 rounded-full border border-white/[0.08] hover:border-[#FF1F6B]/50 transition-colors"><span class="text-[#FF1F6B]">💾</span> SQLite / DuckDB</span>
+          <span class="text-[#FF2D7A]/50">✦</span>
+          <span class="flex items-center gap-2 text-sm font-mono text-white/80 bg-white/[0.03] px-4 py-1.5 rounded-full border border-white/[0.08] hover:border-[#FF1F6B]/50 transition-colors"><span class="text-[#FF1F6B]">🐍</span> Python 3.12 SDK</span>
+          <span class="text-[#FF2D7A]/50">✦</span>
+          <span class="flex items-center gap-2 text-sm font-mono text-white/80 bg-white/[0.03] px-4 py-1.5 rounded-full border border-white/[0.08] hover:border-[#FF1F6B]/50 transition-colors"><span class="text-[#FF1F6B]">🌐</span> REST &amp; gRPC Gateway</span>
+          <span class="text-[#FF2D7A]/50">✦</span>
+          <span class="flex items-center gap-2 text-sm font-mono text-white/80 bg-white/[0.03] px-4 py-1.5 rounded-full border border-white/[0.08] hover:border-[#FF1F6B]/50 transition-colors"><span class="text-[#FF1F6B]">🛡️</span> LangChain / AutoGen / CrewAI</span>
+          <span class="text-[#FF2D7A]/50">✦</span>
+        </div>
+        <div aria-hidden="true" class="flex items-center gap-8 whitespace-nowrap animate-marquee">
+          <span class="flex items-center gap-2 text-sm font-mono text-white/80 bg-white/[0.03] px-4 py-1.5 rounded-full border border-white/[0.08] hover:border-[#FF1F6B]/50 transition-colors"><span class="text-[#FF1F6B]">⚡</span> FastAPI</span>
+          <span class="text-[#FF2D7A]/50">✦</span>
+          <span class="flex items-center gap-2 text-sm font-mono text-white/80 bg-white/[0.03] px-4 py-1.5 rounded-full border border-white/[0.08] hover:border-[#FF1F6B]/50 transition-colors"><span class="text-[#FF1F6B]">⚛</span> React 19</span>
+          <span class="text-[#FF2D7A]/50">✦</span>
+          <span class="flex items-center gap-2 text-sm font-mono text-white/80 bg-white/[0.03] px-4 py-1.5 rounded-full border border-white/[0.08] hover:border-[#FF1F6B]/50 transition-colors"><span class="text-[#FF1F6B]">💾</span> SQLite / DuckDB</span>
+          <span class="text-[#FF2D7A]/50">✦</span>
+          <span class="flex items-center gap-2 text-sm font-mono text-white/80 bg-white/[0.03] px-4 py-1.5 rounded-full border border-white/[0.08] hover:border-[#FF1F6B]/50 transition-colors"><span class="text-[#FF1F6B]">🐍</span> Python 3.12 SDK</span>
+          <span class="text-[#FF2D7A]/50">✦</span>
+          <span class="flex items-center gap-2 text-sm font-mono text-white/80 bg-white/[0.03] px-4 py-1.5 rounded-full border border-white/[0.08] hover:border-[#FF1F6B]/50 transition-colors"><span class="text-[#FF1F6B]">🌐</span> REST &amp; gRPC Gateway</span>
+          <span class="text-[#FF2D7A]/50">✦</span>
+          <span class="flex items-center gap-2 text-sm font-mono text-white/80 bg-white/[0.03] px-4 py-1.5 rounded-full border border-white/[0.08] hover:border-[#FF1F6B]/50 transition-colors"><span class="text-[#FF1F6B]">🛡️</span> LangChain / AutoGen / CrewAI</span>
+          <span class="text-[#FF2D7A]/50">✦</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Section 1: The Problem with Scroll Stagger Reveal -->
+<section class="relative z-10 py-20 max-w-7xl mx-auto px-6">
+  <div class="text-center max-w-3xl mx-auto mb-16 reveal-on-scroll">
+    <div class="shimmer-pill inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#1A0E15] border border-[#FF1F6B]/30 text-[#FFB3D1] text-xs font-semibold uppercase tracking-wider mb-3">
+      <span class="text-[#FF1F6B]">⚠</span> Risk Surface
+    </div>
+    <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+      Autonomous agents move fast. <br/>
+      <span class="crimson-gradient-text inline-block">Mistakes are irreversible.</span>
+    </h2>
+    <p class="text-[#B9A9B1] mt-4 text-base">When you give an LLM bash access, API tokens, and file system privileges, prompt injection or hallucinations become direct existential threats.</p>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+    <div class="spotlight-card rounded-2xl p-7 flex flex-col justify-between reveal-on-scroll delay-100 group">
+      <div>
+        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-[#FF1F6B]/20 to-transparent border border-[#FF1F6B]/30 flex items-center justify-center text-[#FF1F6B] text-xl mb-6 group-hover:scale-110 group-hover:shadow-[0_0_15px_rgba(255,31,107,0.4)] transition-all">
+          💥
+        </div>
+        <h3 class="text-xl font-bold text-white mb-2">Accidental Damage</h3>
+        <p class="text-sm text-[#B9A9B1] leading-relaxed">
+          Recursive file deletions, drops on production database clusters, or malformed cloud infrastructure provisioning driven by hallucinated agent reasoning loops.
+        </p>
+      </div>
+      <div class="mt-6 pt-4 border-t border-white/[0.06] text-xs font-mono text-[#FF1F6B] flex items-center gap-1.5">
+        <span>Target:</span> <span class="text-white/70">rm -rf / clusters</span>
+      </div>
+    </div>
+
+    <div class="spotlight-card rounded-2xl p-7 flex flex-col justify-between reveal-on-scroll delay-200 group">
+      <div>
+        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-[#FF1F6B]/20 to-transparent border border-[#FF1F6B]/30 flex items-center justify-center text-[#FF1F6B] text-xl mb-6 group-hover:scale-110 group-hover:shadow-[0_0_15px_rgba(255,189,107,0.4)] transition-all">
+          🔓
+        </div>
+        <h3 class="text-xl font-bold text-white mb-2">Sensitive Access Exfiltration</h3>
+        <p class="text-sm text-[#B9A9B1] leading-relaxed">
+          Agents lured via prompt-injected emails or files to curl environment secrets, Stripe keys, and customer PII straight out to third-party command servers.
+        </p>
+      </div>
+      <div class="mt-6 pt-4 border-t border-white/[0.06] text-xs font-mono text-[#FFBD6B] flex items-center gap-1.5">
+        <span>Target:</span> <span class="text-white/70">.env &amp; Auth Credentials</span>
+      </div>
+    </div>
+
+    <div class="spotlight-card rounded-2xl p-7 flex flex-col justify-between reveal-on-scroll delay-300 group">
+      <div>
+        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-[#FF1F6B]/20 to-transparent border border-[#FF1F6B]/30 flex items-center justify-center text-[#FF1F6B] text-xl mb-6 group-hover:scale-110 group-hover:shadow-[0_0_15px_rgba(61,220,151,0.4)] transition-all">
+          👁️‍🗨️
+        </div>
+        <h3 class="text-xl font-bold text-white mb-2">Missing Supervision</h3>
+        <p class="text-sm text-[#B9A9B1] leading-relaxed">
+          Autonomous loops run at 2:00 AM on background jobs. Static permission models are either too restrictive to let agents work, or too permissive to keep you safe.
+        </p>
+      </div>
+      <div class="mt-6 pt-4 border-t border-white/[0.06] text-xs font-mono text-emerald-400 flex items-center gap-1.5">
+        <span>Target:</span> <span class="text-white/70">Human-in-the-Loop Gaps</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="quote-glow-border relative overflow-hidden rounded-2xl p-8 md:p-12 text-center bg-gradient-to-r from-[#210915] via-[#120a10] to-[#240b17] border border-[#FF1F6B]/30 shadow-[0_0_50px_rgba(255,31,107,0.15)] reveal-on-scroll">
+    <div class="text-xs uppercase font-mono tracking-widest text-[#FF1F6B] mb-2 font-semibold">Core Principle</div>
+    <blockquote class="text-2xl md:text-4xl font-extrabold text-white tracking-tight">
+      “Permission to run <span class="text-[#FF1F6B] inline-block hover:scale-125 transition-transform duration-200">≠</span> permission to do anything.”
+    </blockquote>
+    <div class="mt-4 text-xs font-mono text-[#B9A9B1]">Zero-trust runtime guardrails between LLM decisions and host OS tools.</div>
+  </div>
+</section>
+
+<!-- Section 2: Pipeline Interception with Animated Connectors -->
+<section class="relative z-10 py-20 max-w-7xl mx-auto px-6 border-t border-white/[0.06]" id="pipeline">
+  <div class="text-center max-w-2xl mx-auto mb-16 reveal-on-scroll">
+    <div class="shimmer-pill inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#1A0E15] border border-[#FF1F6B]/30 text-[#FFB3D1] text-xs font-semibold uppercase tracking-wider mb-3">
+      Pipeline Interception
+    </div>
+    <h2 class="text-3xl sm:text-4xl font-extrabold text-white">How AgentGuard Intervenes</h2>
+    <p class="text-[#B9A9B1] mt-3">Every tool payload is intercepted at the network/socket boundary before execution.</p>
+  </div>
+
+  <div class="flex flex-col md:flex-row items-stretch gap-4 md:gap-0 relative">
+    <!-- Step 1 -->
+    <div class="w-full md:flex-1 spotlight-card rounded-2xl p-5 lg:p-6 relative flex flex-col justify-between reveal-on-scroll delay-100">
+      <div>
+        <div class="text-[10px] font-mono font-bold text-white/40 mb-2">01 / DISPATCH</div>
+        <div class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-[#FFB3D1] mb-4 text-xl">🤖</div>
+        <h4 class="text-base font-bold text-white">AI Agent</h4>
+        <p class="text-xs text-[#B9A9B1] mt-2 leading-relaxed">Autonomous model formulates tool invocation schema (e.g. bash, fs_write, sql_exec).</p>
+      </div>
+    </div>
+
+    <!-- Connector 1 -->
+    <div class="hidden md:flex self-center flex-shrink-0 w-4 lg:w-6 h-[2px] bg-gradient-to-r from-white/20 to-[#FF1F6B] pipeline-connector"></div>
+    <div class="md:hidden flex justify-center -my-1">
+      <div class="w-[2px] h-4 bg-gradient-to-b from-white/20 to-[#FF1F6B] pipeline-connector-vertical"></div>
+    </div>
+
+    <!-- Step 2 -->
+    <div class="w-full md:flex-1 spotlight-card rounded-2xl p-5 lg:p-6 relative flex flex-col justify-between border-[#FF1F6B] shadow-[0_0_35px_rgba(255,31,107,0.35)] bg-[#190913]/90 ring-1 ring-[#FF1F6B]/40 reveal-on-scroll delay-200">
+      <div>
+        <div class="text-[10px] font-mono font-bold text-[#FF1F6B] mb-2 flex items-center justify-between">
+          <span>02 / INTERCEPT</span>
+          <span class="w-2 h-2 rounded-full bg-[#FF1F6B] animate-ping"></span>
+        </div>
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#FF1F6B] to-[#B0004A] text-white flex items-center justify-center text-lg mb-4 shadow-[0_0_20px_rgba(255,31,107,0.6)]">🛡️</div>
+        <h4 class="text-base font-bold text-white">AgentGuard Engine</h4>
+        <p class="text-xs text-[#FFD1E3] mt-2 leading-relaxed font-medium">Inspects parameter semantics, checks stateful context, path safety, and evaluates risk score.</p>
+      </div>
+    </div>
+
+    <!-- Connector 2 -->
+    <div class="hidden md:flex self-center flex-shrink-0 w-4 lg:w-6 h-[2px] bg-gradient-to-r from-[#FF1F6B] to-[#3DDC97] pipeline-connector"></div>
+    <div class="md:hidden flex justify-center -my-1">
+      <div class="w-[2px] h-4 bg-gradient-to-b from-[#FF1F6B] to-[#3DDC97] pipeline-connector-vertical"></div>
+    </div>
+
+    <!-- Step 3 -->
+    <div class="w-full md:flex-1 spotlight-card rounded-2xl p-5 lg:p-6 relative flex flex-col justify-between reveal-on-scroll delay-300">
+      <div>
+        <div class="text-[10px] font-mono font-bold text-white/40 mb-2">03 / DECISION</div>
+        <div class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-lg mb-4">⚖️</div>
+        <h4 class="text-base font-bold text-white">3-Way Policy</h4>
+        <div class="flex flex-col gap-1.5 mt-2 font-mono text-[11px]">
+          <span class="text-[#3DDC97]">✔ ALLOW (Instant)</span>
+          <span class="text-[#FFBD6B]">❓ ASK (2-Factor/Slack)</span>
+          <span class="text-[#FF1F6B]">⛔ BLOCK (Isolated)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Connector 3 -->
+    <div class="hidden md:flex self-center flex-shrink-0 w-4 lg:w-6 h-[2px] bg-gradient-to-r from-[#3DDC97] to-white/20 pipeline-connector"></div>
+    <div class="md:hidden flex justify-center -my-1">
+      <div class="w-[2px] h-4 bg-gradient-to-b from-[#3DDC97] to-white/20 pipeline-connector-vertical"></div>
+    </div>
+
+    <!-- Step 4 -->
+    <div class="w-full md:flex-1 spotlight-card rounded-2xl p-5 lg:p-6 relative flex flex-col justify-between reveal-on-scroll delay-400">
+      <div>
+        <div class="text-[10px] font-mono font-bold text-white/40 mb-2">04 / EXECUTION</div>
+        <div class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-lg mb-4">💻</div>
+        <h4 class="text-base font-bold text-white">System Tools</h4>
+        <p class="text-xs text-[#B9A9B1] mt-2 leading-relaxed">Only validated and sanitized operations touch the host machine, file system, or live DB.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Section 3: Risk Evaluation Engine -->
+<section class="relative z-10 py-20 max-w-7xl mx-auto px-6" id="engine">
+  <div class="text-center max-w-3xl mx-auto mb-16 reveal-on-scroll">
+    <div class="shimmer-pill inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#1A0E15] border border-[#FF1F6B]/30 text-[#FFB3D1] text-xs font-semibold uppercase tracking-wider mb-3">
+      Dynamic Scoring
+    </div>
+    <h2 class="text-3xl sm:text-4xl font-extrabold text-white">Deterministic Three-Tier Evaluation</h2>
+    <p class="text-[#B9A9B1] mt-3">Calculated in under 4ms using semantic heuristics, parameter ASTs, and target reputation.</p>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div class="spotlight-card rounded-2xl p-6 border-l-4 border-l-[#3DDC97] relative overflow-hidden flex flex-col justify-between reveal-on-scroll delay-100">
+      <div>
+        <div class="flex items-center justify-between mb-4">
+          <span class="px-2.5 py-0.5 rounded text-[11px] font-mono font-bold bg-[#3DDC97]/15 text-[#3DDC97] border border-[#3DDC97]/30">ALLOW</span>
+          <span class="font-mono text-xs text-white/60">Risk Score: 0 – 29</span>
+        </div>
+        <h3 class="text-xl font-bold text-white">Low Impact Operations</h3>
+        <p class="text-xs text-[#B9A9B1] mt-2 leading-relaxed">
+          Read-only file queries, public documentation web scraping, safe linting commands, non-mutating search queries.
+        </p>
+      </div>
+      <div class="mt-6 pt-4 border-t border-white/[0.08] flex items-center justify-between text-xs font-mono">
+        <span class="text-white/60">Execution Latency:</span>
+        <span class="text-[#3DDC97] font-bold">&lt; 1.2ms</span>
+      </div>
+    </div>
+
+    <div class="spotlight-card rounded-2xl p-6 border-l-4 border-l-[#FFBD6B] relative overflow-hidden flex flex-col justify-between reveal-on-scroll delay-200">
+      <div>
+        <div class="flex items-center justify-between mb-4">
+          <span class="px-2.5 py-0.5 rounded text-[11px] font-mono font-bold bg-[#FFBD6B]/15 text-[#FFBD6B] border border-[#FFBD6B]/30">ASK (HUMAN REVIEW)</span>
+          <span class="font-mono text-xs text-white/60">Risk Score: 30 – 69</span>
+        </div>
+        <h3 class="text-xl font-bold text-white">Ambiguous Mutations</h3>
+        <p class="text-xs text-[#B9A9B1] mt-2 leading-relaxed">
+          Bulk rename of files, outbound webhooks with novel payloads, modification of config files, high-cost LLM sub-delegation.
+        </p>
+      </div>
+      <div class="mt-6 pt-4 border-t border-white/[0.08] flex items-center justify-between text-xs font-mono">
+        <span class="text-white/60">Verification Hook:</span>
+        <span class="text-[#FFBD6B] font-bold">Slack / Webhook 2FA</span>
+      </div>
+    </div>
+
+    <div class="spotlight-card rounded-2xl p-6 border-l-4 border-l-[#FF1F6B] relative overflow-hidden shadow-[0_0_20px_rgba(255,31,107,0.15)] flex flex-col justify-between reveal-on-scroll delay-300">
+      <div>
+        <div class="flex items-center justify-between mb-4">
+          <span class="px-2.5 py-0.5 rounded text-[11px] font-mono font-bold bg-[#FF1F6B]/20 text-[#FF1F6B] border border-[#FF1F6B]/40">BLOCK</span>
+          <span class="font-mono text-xs text-white/60">Risk Score: 70 – 100</span>
+        </div>
+        <h3 class="text-xl font-bold text-white">Catastrophic Actions</h3>
+        <p class="text-xs text-[#B9A9B1] mt-2 leading-relaxed">
+          Recursive deletions (`rm -rf`), reading SSH keys or `.env`, dropping database tables, network socket binds to blacklisted IPs.
+        </p>
+      </div>
+      <div class="mt-6 pt-4 border-t border-white/[0.08] flex items-center justify-between text-xs font-mono">
+        <span class="text-white/60">Containment:</span>
+        <span class="text-[#FF1F6B] font-bold">Instant Hard Trap</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="mt-8 spotlight-card rounded-2xl p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 reveal-on-scroll">
+    <div class="flex items-center gap-6">
+      <div class="relative w-28 h-28 flex items-center justify-center flex-shrink-0">
+        <svg class="w-28 h-28 transform -rotate-90">
+          <circle cx="56" cy="56" fill="none" r="46" stroke="rgba(255,255,255,0.06)" stroke-width="8"></circle>
+          <circle cx="56" cy="56" fill="none" r="46" stroke="url(#riskDialGrad)" stroke-dasharray="289" stroke-dashoffset="65" stroke-linecap="round" stroke-width="8"></circle>
+          <defs>
+            <linearGradient id="riskDialGrad" x1="0%" x2="100%" y1="0%" y2="100%">
+              <stop offset="0%" stop-color="#3DDC97"></stop>
+              <stop offset="50%" stop-color="#FFBD6B"></stop>
+              <stop offset="100%" stop-color="#FF1F6B"></stop>
+            </linearGradient>
+          </defs>
+        </svg>
+        <div class="absolute text-center">
+          <span class="text-xs font-mono text-white/50 block">MAX</span>
+          <span class="text-xl font-mono font-extrabold text-[#FF1F6B]">100</span>
+        </div>
+      </div>
+      <div>
+        <div class="text-base font-bold text-white flex items-center gap-2">
+          <span>Adaptive Threat Scoring Dial</span>
+          <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-[#FF1F6B]/20 text-[#FF1F6B] border border-[#FF1F6B]/30 font-bold">Dynamic AST</span>
+        </div>
+        <p class="text-xs text-[#B9A9B1] mt-1 max-w-xl">
+          Calculated via parameter tree traversal, known blast-radius heuristics, and caller permission boundaries before kernel dispatch.
+        </p>
+      </div>
+    </div>
+    <div class="flex items-center gap-4 text-xs font-mono">
+      <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-[#3DDC97]"></span> Allow (0-29)</div>
+      <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-[#FFBD6B]"></span> Ask (30-69)</div>
+      <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-[#FF1F6B]"></span> Block (70-100)</div>
+    </div>
+  </div>
+</section>
+
+<!-- Section 4: Live Interactive Sandbox Centerpiece -->
+<section class="relative z-10 py-20 max-w-7xl mx-auto px-6" id="demo">
+  <div class="text-center max-w-3xl mx-auto mb-12 reveal-on-scroll">
+    <div class="shimmer-pill inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#1A0E15] border border-[#FF1F6B]/40 text-[#FF1F6B] text-xs font-bold uppercase tracking-wider mb-3 shadow-[0_0_15px_rgba(255,31,107,0.3)]">
+      Interactive Sandbox
+    </div>
+    <h2 class="text-3xl sm:text-5xl font-extrabold text-white tracking-tight">Experience Live Interception</h2>
+    <p class="text-[#B9A9B1] mt-3">Select a scenario below and watch the runtime security layer evaluate and intervene in real-time.</p>
+
+    <div class="flex flex-wrap justify-center gap-3 mt-8">
+      <button class="px-5 py-2.5 rounded-full text-xs font-bold font-mono transition-all duration-200 border border-[#3DDC97]/40 bg-[#3DDC97]/10 text-white hover:bg-[#3DDC97]/20 flex items-center gap-2 hover:scale-105 active:scale-95" id="scenarioBtn1" onclick="runScenario(1)">
+        <span class="w-2 h-2 rounded-full bg-[#3DDC97]"></span>
+        <span>Scenario 1: Safe File Edit (Score: 12)</span>
+      </button>
+      <button class="px-5 py-2.5 rounded-full text-xs font-bold font-mono transition-all duration-200 border border-[#FFBD6B]/40 bg-[#FFBD6B]/10 text-white hover:bg-[#FFBD6B]/20 flex items-center gap-2 hover:scale-105 active:scale-95" id="scenarioBtn2" onclick="runScenario(2)">
+        <span class="w-2 h-2 rounded-full bg-[#FFBD6B]"></span>
+        <span>Scenario 2: Bulk Rename (Score: 54)</span>
+      </button>
+      <button class="px-5 py-2.5 rounded-full text-xs font-bold font-mono transition-all duration-200 border border-[#FF1F6B] bg-[#FF1F6B]/20 text-white hover:bg-[#FF1F6B]/30 shadow-[0_0_15px_rgba(255,31,107,0.4)] flex items-center gap-2 hover:scale-105 active:scale-95 ring-2 ring-white/40 scale-105" id="scenarioBtn3" onclick="runScenario(3)">
+        <span class="w-2 h-2 rounded-full bg-[#FF1F6B] animate-ping"></span>
+        <span>Scenario 3: Delete Project Folder (Score: 92)</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="max-w-5xl mx-auto rounded-2xl overflow-hidden border border-white/[0.12] bg-[#0c090c] shadow-[0_25px_70px_rgba(0,0,0,0.85)] relative reveal-on-scroll" id="demoContainer">
+    <div class="h-10 bg-[#161215] border-b border-white/[0.08] px-4 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <div class="w-3 h-3 rounded-full bg-rose-500/80"></div>
+        <div class="w-3 h-3 rounded-full bg-amber-500/80"></div>
+        <div class="w-3 h-3 rounded-full bg-emerald-500/80"></div>
+        <span class="ml-3 font-mono text-xs text-white/40">agentguard-daemon :: session #ag-9942</span>
+      </div>
+      <div class="flex items-center gap-2 text-xs font-mono text-[#FFB3D1]">
+        <span class="w-2 h-2 rounded-full bg-[#3DDC97]" id="demoStatusDot"></span>
+        <span id="demoStatusText">THREAT CONTAINED</span>
+      </div>
+    </div>
+
+    <div class="bg-[#120e11] border-b border-white/[0.06] px-6 py-3 flex items-center justify-between text-xs font-mono overflow-x-auto">
+      <div class="flex items-center gap-2 text-[#FF1F6B] font-bold" id="step1"><span class="w-5 h-5 rounded-full border border-[#FF1F6B] flex items-center justify-center text-[10px]">1</span> Task</div>
+      <span class="text-white/20">→</span>
+      <div class="flex items-center gap-2 text-[#FF1F6B] font-bold" id="step2"><span class="w-5 h-5 rounded-full border border-[#FF1F6B] flex items-center justify-center text-[10px]">2</span> Action</div>
+      <span class="text-white/20">→</span>
+      <div class="flex items-center gap-2 text-[#FF1F6B] font-bold" id="step3"><span class="w-5 h-5 rounded-full border border-[#FF1F6B] flex items-center justify-center text-[10px]">3</span> Detect</div>
+      <span class="text-white/20">→</span>
+      <div class="flex items-center gap-2 text-[#FF1F6B] font-bold" id="step4"><span class="w-5 h-5 rounded-full border border-[#FF1F6B] flex items-center justify-center text-[10px]">4</span> Respond</div>
+      <span class="text-white/20">→</span>
+      <div class="flex items-center gap-2 text-white/40" id="step5"><span class="w-5 h-5 rounded-full border border-white/20 flex items-center justify-center text-[10px]">5</span> Audit</div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 min-h-[440px]">
+      <div class="lg:col-span-7 p-6 font-mono text-xs border-b lg:border-b-0 lg:border-r border-white/[0.08] bg-black/60 flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between text-white/40 pb-3 border-b border-white/[0.05] mb-4">
+            <span>AGENT CONSOLE: [AutoDev_Agent_v3]</span>
+            <span id="timecode">00:00:01</span>
+          </div>
+          <div class="space-y-3 leading-relaxed text-[#dcd1d6]" id="terminalStream">
+            <p class="text-white/50">$ agent --task "Clean directory cache"</p>
+            <p class="text-cyan-300">› Agent initialized with PID: 8109</p>
+            <div id="scenarioConsoleContent">
+              <p class="text-rose-400 font-bold">[CRITICAL ALERT] Agent attempted recursive command:</p>
+              <p class="text-rose-300 font-bold">bash_exec("rm -rf ./src/")</p>
+              <p class="text-[#FF1F6B] font-extrabold">⛔ AGENTGUARD HARD TRAP TRIGGERED (Severity: 92/100)</p>
+              <p class="text-[#FF1F6B]">Execution immediately terminated at kernel gateway.</p>
+              <p class="text-white/60">[CONTAINMENT] Host file system untouched. Threat signature logged & quarantined.</p>
+            </div>
+            <div class="flex items-center gap-1.5 text-white/70" id="streamingCursor">
+              <span class="text-cyan-400">›</span>
+              <span class="w-2 h-4 bg-[#FF1F6B] inline-block animate-blink"></span>
+            </div>
+          </div>
+        </div>
+        <div class="pt-4 mt-6 border-t border-white/[0.06] flex items-center justify-between text-[11px] text-white/40">
+          <span>Runtime: Node 20.x + Python Shim</span>
+          <button class="text-[#FF1F6B] hover:underline flex items-center gap-1 hover:text-white transition-colors" onclick="replayCurrentScenario()">
+            ↺ Replay scenario
+          </button>
+        </div>
+      </div>
+
+      <div class="lg:col-span-5 p-6 bg-[#100a0e]/95 flex flex-col justify-between relative overflow-hidden">
+        <div class="absolute inset-0 z-30 bg-[#FF1F6B]/15 backdrop-blur-[2px] flex items-center justify-center pointer-events-none transition-all duration-300" id="blockedStamp">
+          <div class="transform -rotate-12 border-4 border-[#FF1F6B] px-8 py-3 rounded-lg text-4xl font-extrabold font-mono text-[#FF1F6B] tracking-widest shadow-[0_0_40px_#FF1F6B] scale-110">
+            BLOCKED
+          </div>
+        </div>
+        <div>
+          <div class="flex items-center justify-between mb-4 pb-2 border-b border-white/[0.08]">
+            <span class="text-xs font-mono font-bold uppercase tracking-wider text-[#FFB3D1]">Guard Evaluation</span>
+            <span class="px-2.5 py-0.5 rounded text-[10px] font-mono font-bold bg-[#FF1F6B]/30 text-[#FF1F6B] border border-[#FF1F6B] font-extrabold animate-pulse" id="decisionPill">
+              BLOCK
+            </span>
+          </div>
+          <div class="p-4 rounded-xl bg-black/40 border border-white/[0.08] mb-4">
+            <div class="flex items-center justify-between text-xs font-mono mb-2">
+              <span class="text-[#B9A9B1]">Assessed Threat Score:</span>
+              <span class="font-extrabold text-lg text-[#FF1F6B]" id="threatScoreDisplay">92 / 100</span>
+            </div>
+            <div class="w-full bg-white/10 h-2.5 rounded-full overflow-hidden">
+              <div class="h-full bg-[#FF1F6B] transition-all duration-700" id="threatProgressBar" style="width: 92%"></div>
+            </div>
+            <div class="flex justify-between text-[9px] font-mono text-white/30 mt-1">
+              <span>0 Safe</span><span>30 Ask</span><span>70+ Block</span>
+            </div>
+          </div>
+          <div class="space-y-3 font-mono text-xs">
+            <div class="text-[11px] text-white/50 uppercase tracking-wider">Triggered Heuristics:</div>
+            <div class="space-y-2" id="heuristicsList">
+              <div class="p-2 rounded bg-white/[0.03] border border-white/[0.05] flex items-center justify-between">
+                <span>Command Severity:</span><span class="text-[#FF1F6B] font-bold">RECURSIVE DELETION (rm -rf)</span>
+              </div>
+              <div class="p-2 rounded bg-white/[0.03] border border-white/[0.05] flex items-center justify-between">
+                <span>Protected Target:</span><span class="text-[#FF1F6B] font-bold">./src/ (Codebase Core)</span>
+              </div>
+              <div class="p-2 rounded bg-white/[0.03] border border-white/[0.05] flex items-center justify-between">
+                <span>Enforcement:</span><span class="text-[#FF1F6B] font-bold">SIGKILL to Agent Subprocess</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="hidden mt-6 pt-4 border-t border-white/[0.1] bg-[#FFBD6B]/10 p-3 rounded-xl border border-[#FFBD6B]/30" id="interactiveApprovalArea">
+          <div class="text-xs font-mono text-[#FFBD6B] mb-2 font-bold flex items-center gap-1.5">
+            <span>⚠️ Action Requires Human Authorization</span>
+          </div>
+          <div class="flex gap-2">
+            <button class="flex-1 py-2 rounded-lg bg-[#3DDC97] text-black font-bold text-xs hover:bg-[#52ebb0] transition-colors" onclick="approveAction()">Approve</button>
+            <button class="flex-1 py-2 rounded-lg bg-[#FF1F6B] text-white font-bold text-xs hover:bg-[#ff4281] transition-colors" onclick="denyAction()">Deny</button>
+          </div>
+        </div>
+
+        <div class="pt-4 border-t border-white/[0.06] text-[10px] font-mono text-[#B9A9B1] flex justify-between items-center">
+          <span>Signed: Ed25519 hash verified</span>
+          <span class="text-white/40">Latency: 2.1ms</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Section 5: Observability & Threat Telemetry Dashboard -->
+<section class="relative z-10 py-20 max-w-7xl mx-auto px-6 border-t border-white/[0.06]" id="dashboard">
+  <div class="text-center max-w-3xl mx-auto mb-16 reveal-on-scroll">
+    <div class="shimmer-pill inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#1A0E15] border border-[#FF1F6B]/30 text-[#FFB3D1] text-xs font-semibold uppercase tracking-wider mb-3">
+      Observability Center
+    </div>
+    <h2 class="text-3xl sm:text-4xl font-extrabold text-white">Full Posture &amp; Threat Telemetry</h2>
+    <p class="text-[#B9A9B1] mt-3">Track all autonomous worker threads, inspect quarantined tokens, and enforce policy sets from a single pane of glass.</p>
+  </div>
+
+  <div class="spotlight-card rounded-2xl p-6 md:p-8 bg-[#0e090c]/90 reveal-on-scroll">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+      <div class="p-4 rounded-xl bg-black/40 border border-white/[0.06] hover:border-white/20 transition-all">
+        <div class="text-xs text-[#B9A9B1] font-mono mb-1">Total Inspected Calls</div>
+        <div class="text-2xl font-bold text-white font-mono counter-value" data-target="148920">0</div>
+        <div class="text-[10px] text-emerald-400 mt-1">↑ 18.4% from last hour</div>
+      </div>
+      <div class="p-4 rounded-xl bg-black/40 border border-white/[0.06] hover:border-[#FFBD6B]/40 transition-all">
+        <div class="text-xs text-[#B9A9B1] font-mono mb-1">Human Interventions</div>
+        <div class="text-2xl font-bold text-[#FFBD6B] font-mono counter-value" data-target="142">0</div>
+        <div class="text-[10px] text-amber-300 mt-1">Avg response: 18s</div>
+      </div>
+      <div class="p-4 rounded-xl bg-black/40 border border-white/[0.06] hover:border-[#FF1F6B]/40 transition-all">
+        <div class="text-xs text-[#B9A9B1] font-mono mb-1">Hard Block Traps</div>
+        <div class="text-2xl font-bold text-[#FF1F6B] font-mono counter-value" data-target="37">0</div>
+        <div class="text-[10px] text-rose-400 mt-1">100% prevented</div>
+      </div>
+      <div class="p-4 rounded-xl bg-black/40 border border-white/[0.06] hover:border-emerald-500/30 transition-all">
+        <div class="text-xs text-[#B9A9B1] font-mono mb-1">Avg Guard Overhead</div>
+        <div class="text-2xl font-bold text-emerald-400 font-mono">1.84ms</div>
+        <div class="text-[10px] text-white/50 mt-1">Zero perceivable lag</div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+      <div class="p-4 rounded-xl bg-black/40 border border-white/[0.06] flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="relative w-14 h-14 flex items-center justify-center">
+            <svg class="w-14 h-14 transform -rotate-90">
+              <circle cx="28" cy="28" fill="none" r="22" stroke="rgba(255,255,255,0.08)" stroke-width="5"></circle>
+              <circle cx="28" cy="28" fill="none" r="22" stroke="#3DDC97" stroke-dasharray="138" stroke-dashoffset="14" stroke-linecap="round" stroke-width="5"></circle>
+              <circle cx="28" cy="28" fill="none" r="22" stroke="#FF1F6B" stroke-dasharray="138" stroke-dashoffset="130" stroke-linecap="round" stroke-width="5"></circle>
+            </svg>
+            <span class="absolute text-[10px] font-mono font-bold text-white">97%</span>
+          </div>
+          <div>
+            <div class="text-xs font-bold text-white">Decision Mix</div>
+            <div class="text-[10px] text-[#B9A9B1] mt-0.5">97.2% Pass · 2.5% Ask · 0.3% Block</div>
+          </div>
+        </div>
+        <span class="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">Normal</span>
+      </div>
+
+      <div class="p-4 rounded-xl bg-black/40 border border-white/[0.06] md:col-span-2 flex flex-col justify-between">
+        <div class="flex items-center justify-between text-xs">
+          <span class="font-bold text-white">Execution Stream Frequency</span>
+          <span class="text-[10px] font-mono text-white/50">4,120 calls / min (Peak)</span>
+        </div>
+        <div class="h-8 w-full mt-2">
+          <svg class="w-full h-full overflow-visible" viewbox="0 0 400 32">
+            <path d="M0,28 L30,24 L60,26 L90,14 L120,20 L150,10 L180,18 L210,6 L240,16 L270,12 L300,22 L330,8 L360,18 L400,10" fill="none" stroke="#FF1F6B" stroke-width="1.8"></path>
+            <circle cx="400" cy="10" fill="#FF1F6B" r="3"></circle>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-3 border-b border-white/[0.08] pb-3 mb-6 text-xs font-mono overflow-x-auto">
+      <button class="text-white border-b-2 border-[#FF1F6B] pb-3 -mb-3 font-bold transition-colors" id="tabBtnEvents" onclick="switchDashboardTab('events')">Live Intercept Events</button>
+      <button class="text-white/50 hover:text-white transition-colors pb-3 -mb-3" id="tabBtnThreats" onclick="switchDashboardTab('threats')">Quarantined Threats (37)</button>
+      <button class="text-white/50 hover:text-white transition-colors pb-3 -mb-3" id="tabBtnPolicies" onclick="switchDashboardTab('policies')">Active Policies (24)</button>
+      <button class="text-white/50 hover:text-white transition-colors pb-3 -mb-3" id="tabBtnAudit" onclick="switchDashboardTab('audit')">Cryptographic Audit Logs</button>
+    </div>
+
+    <div class="overflow-x-auto" id="dashboardTabContent">
+      <table class="w-full text-left text-xs font-mono">
+        <thead>
+          <tr class="text-white/40 border-b border-white/[0.06]">
+            <th class="pb-3 font-medium">Timestamp</th>
+            <th class="pb-3 font-medium">Agent ID</th>
+            <th class="pb-3 font-medium">Attempted Command / Tool</th>
+            <th class="pb-3 font-medium">Target Resource</th>
+            <th class="pb-3 font-medium">Risk Score</th>
+            <th class="pb-3 font-medium">Decision</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-white/[0.04]">
+          <tr class="hover:bg-white/[0.02]">
+            <td class="py-3 text-white/60">14:28:02.112</td>
+            <td class="py-3 text-cyan-300">agent-coder-9</td>
+            <td class="py-3 text-white font-medium">file_write</td>
+            <td class="py-3 text-[#B9A9B1]">./src/components/Header.tsx</td>
+            <td class="py-3"><span class="text-[#3DDC97]">14/100</span></td>
+            <td class="py-3"><span class="px-2 py-0.5 rounded text-[10px] bg-[#3DDC97]/15 text-[#3DDC97] border border-[#3DDC97]/30">ALLOW</span></td>
+          </tr>
+          <tr class="hover:bg-white/[0.02]">
+            <td class="py-3 text-white/60">14:27:49.804</td>
+            <td class="py-3 text-purple-300">agent-scraper-02</td>
+            <td class="py-3 text-white font-medium">http_request</td>
+            <td class="py-3 text-[#B9A9B1]">https://api.internal.corp/billing</td>
+            <td class="py-3"><span class="text-[#FFBD6B]">62/100</span></td>
+            <td class="py-3"><span class="px-2 py-0.5 rounded text-[10px] bg-[#FFBD6B]/15 text-[#FFBD6B] border border-[#FFBD6B]/30">ASK (Approved)</span></td>
+          </tr>
+          <tr class="hover:bg-[#FF1F6B]/5">
+            <td class="py-3 text-white/60">14:26:11.450</td>
+            <td class="py-3 text-rose-300">agent-eval-loop</td>
+            <td class="py-3 text-[#FF1F6B] font-bold">bash_exec ("rm -rf /app/storage")</td>
+            <td class="py-3 text-[#FF1F6B]">/app/storage/*</td>
+            <td class="py-3"><span class="text-[#FF1F6B] font-bold">96/100</span></td>
+            <td class="py-3"><span class="px-2 py-0.5 rounded text-[10px] bg-[#FF1F6B]/20 text-[#FF1F6B] border border-[#FF1F6B]/50 font-bold animate-pulse">BLOCK</span></td>
+          </tr>
+          <tr class="hover:bg-white/[0.02]">
+            <td class="py-3 text-white/60">14:25:33.201</td>
+            <td class="py-3 text-cyan-300">agent-coder-9</td>
+            <td class="py-3 text-white font-medium">git_commit</td>
+            <td class="py-3 text-[#B9A9B1]">ref: refs/heads/feature/auth</td>
+            <td class="py-3"><span class="text-[#3DDC97]">18/100</span></td>
+            <td class="py-3"><span class="px-2 py-0.5 rounded text-[10px] bg-[#3DDC97]/15 text-[#3DDC97] border border-[#3DDC97]/30">ALLOW</span></td>
+          </tr>
+          <tr class="hover:bg-[#FF1F6B]/5">
+            <td class="py-3 text-white/60">14:24:02.998</td>
+            <td class="py-3 text-rose-300">agent-auto-research</td>
+            <td class="py-3 text-[#FF1F6B] font-bold">env_read</td>
+            <td class="py-3 text-[#FF1F6B]">AWS_SECRET_ACCESS_KEY</td>
+            <td class="py-3"><span class="text-[#FF1F6B] font-bold">94/100</span></td>
+            <td class="py-3"><span class="px-2 py-0.5 rounded text-[10px] bg-[#FF1F6B]/20 text-[#FF1F6B] border border-[#FF1F6B]/50 font-bold">BLOCK</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- Section 6: In-Memory Architecture -->
+<section class="relative z-10 py-20 max-w-7xl mx-auto px-6" id="architecture">
+  <div class="text-center max-w-3xl mx-auto mb-16 reveal-on-scroll">
+    <div class="shimmer-pill inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#1A0E15] border border-[#FF1F6B]/30 text-[#FFB3D1] text-xs font-semibold uppercase tracking-wider mb-3">
+      Under the Hood
+    </div>
+    <h2 class="text-3xl sm:text-4xl font-extrabold text-white">Non-Intrusive In-Memory Architecture</h2>
+    <p class="text-[#B9A9B1] mt-3">Deploy as a local sidecar daemon, eBPF driver, or lightweight Python wrapper around your agent frameworks.</p>
+  </div>
+
+  <div class="spotlight-card rounded-2xl p-8 max-w-4xl mx-auto relative overflow-hidden reveal-on-scroll">
+    <div class="grid grid-cols-1 md:grid-cols-5 gap-4 items-center text-center font-mono">
+      <div class="p-4 rounded-xl bg-black/60 border border-white/10 hover:border-[#FF1F6B]/40 transition-all">
+        <div class="text-[#FFB3D1] text-sm font-bold">Agent Loop</div>
+        <div class="text-[10px] text-white/40 mt-1">LangChain, AutoGen, CrewAI</div>
+      </div>
+      <div class="text-[#FF1F6B] text-xl font-bold flex justify-center animate-pulse">→</div>
+      <div class="p-4 rounded-xl bg-[#1d0a14] border border-[#FF1F6B]/60 shadow-[0_0_20px_rgba(255,31,107,0.2)] hover:shadow-[0_0_30px_rgba(255,31,107,0.4)] transition-all">
+        <div class="text-white text-sm font-bold flex items-center justify-center gap-1">
+          <span class="w-2 h-2 rounded-full bg-[#FF1F6B] animate-ping"></span> Gateway
+        </div>
+        <div class="text-[10px] text-[#FFB3D1] mt-1">eBPF / Unix Domain Socket</div>
+      </div>
+      <div class="text-[#FF1F6B] text-xl font-bold flex justify-center animate-pulse">→</div>
+      <div class="p-4 rounded-xl bg-black/60 border border-white/10 hover:border-[#3DDC97]/40 transition-all">
+        <div class="text-emerald-400 text-sm font-bold">Host / Sandbox</div>
+        <div class="text-[10px] text-white/40 mt-1">Docker, MicroVM, Bare Metal</div>
+      </div>
+    </div>
+    <div class="mt-8 pt-6 border-t border-white/[0.08] flex flex-wrap justify-center gap-3 text-xs font-mono text-[#B9A9B1]">
+      <span class="px-3 py-1 rounded bg-white/[0.04] border border-white/10 hover:border-[#FF1F6B]/50 transition-colors">Next.js 15 App Router</span>
+      <span class="px-3 py-1 rounded bg-white/[0.04] border border-white/10 hover:border-[#FF1F6B]/50 transition-colors">Tailwind CSS 3.4</span>
+      <span class="px-3 py-1 rounded bg-white/[0.04] border border-white/10 hover:border-[#FF1F6B]/50 transition-colors">Rust Core Kernel</span>
+      <span class="px-3 py-1 rounded bg-white/[0.04] border border-white/10 hover:border-[#FF1F6B]/50 transition-colors">Framer Motion Primitives</span>
+      <span class="px-3 py-1 rounded bg-white/[0.04] border border-white/10 hover:border-[#FF1F6B]/50 transition-colors">Zero External SaaS Dependency</span>
+    </div>
+  </div>
+</section>
+
+<!-- Section 7: Roadmap -->
+<section class="relative z-10 py-20 max-w-7xl mx-auto px-6 border-t border-white/[0.06]">
+  <div class="text-center max-w-2xl mx-auto mb-16 reveal-on-scroll">
+    <div class="shimmer-pill inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#1A0E15] border border-[#FF1F6B]/30 text-[#FFB3D1] text-xs font-semibold uppercase tracking-wider mb-3">
+      Roadmap
+    </div>
+    <h2 class="text-3xl sm:text-4xl font-extrabold text-white">Built for Mission-Critical Production</h2>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto relative">
+    <div class="spotlight-card rounded-2xl p-6 reveal-on-scroll delay-100">
+      <div class="text-xs font-mono text-[#3DDC97] mb-2 font-bold flex items-center gap-1.5">
+        <span class="w-1.5 h-1.5 rounded-full bg-[#3DDC97]"></span> RELEASED (Q1 2025)
+      </div>
+      <h4 class="text-lg font-bold text-white mb-2">Deterministic AST Parser</h4>
+      <p class="text-xs text-[#B9A9B1] leading-relaxed">Full bash command decompilation, SQL table mutation checking, and network egress IP blacklisting.</p>
+    </div>
+    <div class="spotlight-card rounded-2xl p-6 border-[#FF1F6B]/40 shadow-[0_0_20px_rgba(255,31,107,0.15)] reveal-on-scroll delay-200">
+      <div class="text-xs font-mono text-[#FF1F6B] mb-2 font-bold flex items-center gap-1.5">
+        <span class="w-1.5 h-1.5 rounded-full bg-[#FF1F6B] animate-ping"></span> CURRENT (Q2 2025)
+      </div>
+      <h4 class="text-lg font-bold text-white mb-2">Contextual Memory Guard</h4>
+      <p class="text-xs text-[#B9A9B1] leading-relaxed">Cross-step anomaly detection: flags when an agent slowly modifies files across multiple turns to circumvent single-step policies.</p>
+    </div>
+    <div class="spotlight-card rounded-2xl p-6 reveal-on-scroll delay-300">
+      <div class="text-xs font-mono text-purple-400 mb-2 font-bold flex items-center gap-1.5">
+        <span class="w-1.5 h-1.5 rounded-full bg-purple-400"></span> UPCOMING (Q3 2025)
+      </div>
+      <h4 class="text-lg font-bold text-white mb-2">eBPF Kernel Enclave</h4>
+      <p class="text-xs text-[#B9A9B1] leading-relaxed">Zero-overhead kernel level enforcement inside Linux containers with cryptographic tamper-evident event streaming.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Footer & Final High-Impact CTA -->
+<footer class="relative z-10 pt-20 pb-16 border-t border-white/[0.08] overflow-hidden">
+  <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] opacity-25 pointer-events-none">
+    <svg class="w-full h-full fill-none stroke-[#FF1F6B]" viewbox="0 0 800 400">
+      <ellipse cx="400" cy="300" rx="380" ry="140" stroke-width="0.8"></ellipse>
+      <ellipse cx="400" cy="300" rx="340" ry="120" stroke-width="0.8"></ellipse>
+      <ellipse cx="400" cy="300" rx="300" ry="100" stroke-width="0.8"></ellipse>
+      <ellipse cx="400" cy="300" rx="260" ry="80" stroke-width="0.8"></ellipse>
+    </svg>
+  </div>
+  <div class="max-w-5xl mx-auto px-6 text-center relative z-10 reveal-on-scroll">
+    <h2 class="text-4xl sm:text-6xl font-extrabold text-white tracking-tight mb-4">
+      Let AI act. <br/>
+      <span class="hero-gradient-text inline-block">Keep humans in control.</span>
+    </h2>
+    <p class="text-[#B9A9B1] text-base max-w-xl mx-auto mb-8">
+      Deploy AgentGuard in 3 minutes. Stop unpredictable agent actions before they trigger database loss, leaked tokens, or downtime.
+    </p>
+    <div class="flex flex-wrap justify-center gap-4 mb-16">
+      <a class="pink-glow-btn px-8 py-3.5 rounded-full bg-[#FF1F6B] hover:bg-[#ff367c] text-white font-bold text-sm tracking-wide transition-transform hover:scale-105 active:scale-95" href="#demo">
+        Start Free Sandbox
+      </a>
+      <a class="px-8 py-3.5 rounded-full border border-white/20 hover:border-white/40 text-white bg-white/[0.03] transition-all text-sm font-semibold flex items-center gap-2 hover:scale-105 active:scale-95" href="https://github.com" target="_blank">
+        <svg class="w-4 h-4 fill-current" viewbox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"></path></svg>
+        <span>Star on GitHub</span>
+      </a>
+    </div>
+    <div class="pt-8 border-t border-white/[0.08] flex flex-col sm:flex-row items-center justify-between text-xs text-[#B9A9B1] font-mono">
+      <div>© 2025 AgentGuard Inc. Open Source under Apache 2.0.</div>
+      <div class="flex items-center gap-6 mt-4 sm:mt-0">
+        <a class="hover:text-white transition-colors" href="#">Documentation</a>
+        <a class="hover:text-white transition-colors" href="#">Privacy</a>
+        <a class="hover:text-white transition-colors" href="#">Security Advisories</a>
+        <a class="hover:text-white transition-colors" href="#">Status</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- Interactive Animation & Sandbox Script -->
+<script>
+  // Spotlight Card Glow
+  document.querySelectorAll('.spotlight-card').forEach(card => {
+    card.addEventListener('mousemove', e => {
+      const rect = card.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      card.style.background = `radial-gradient(circle at ${x}px ${y}px, rgba(255, 31, 107, 0.12), rgba(18, 16, 18, 0.72) 75%)`;
+    });
+    card.addEventListener('mouseleave', () => {
+      card.style.background = 'rgba(18, 16, 18, 0.72)';
+    });
+  });
+
+  // IntersectionObserver for Staggered Scroll Reveals
+  const revealObserver = new IntersectionObserver((entries, observer) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('revealed');
+        const counters = entry.target.querySelectorAll('.counter-value');
+        counters.forEach(counter => animateCounter(counter));
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -30px 0px' });
+
+  document.querySelectorAll('.reveal-on-scroll').forEach(el => revealObserver.observe(el));
+
+  // Counter Number Up Animation
+  function animateCounter(el) {
+    if (el.dataset.animated) return;
+    el.dataset.animated = "true";
+    const target = parseInt(el.getAttribute('data-target') || '0', 10);
+    const duration = 1300;
+    const startTime = performance.now();
+
+    function update(currentTime) {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const easeProgress = 1 - Math.pow(1 - progress, 3);
+      const currentVal = Math.floor(easeProgress * target);
+      el.textContent = currentVal.toLocaleString();
+      if (progress < 1) {
+        requestAnimationFrame(update);
+      } else {
+        el.textContent = target.toLocaleString();
+      }
+    }
+    requestAnimationFrame(update);
+  }
+
+  // Auto trigger hero counters
+  window.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+      document.querySelectorAll('#hero .counter-value').forEach(el => animateCounter(el));
+    }, 400);
+  });
+
+  // Scenarios Data for Interactive Live Sandbox
+  const scenarios = {
+    1: {
+      title: "Safe File Edit",
+      consoleLines: [
+        '<span class="text-white/60">[PLAN]</span> Reviewing docs/README.md markdown structure...',
+        '<span class="text-white/60">[ACTION]</span> Tool invocation: <span class="text-cyan-300">fs_write(path="./docs/README.md")</span>',
+        '<span class="text-emerald-400">✔ AgentGuard intercepted payload: 0 destructive patterns detected.</span>',
+        '<span class="text-white/60">[EXECUTE]</span> Writing 42 lines to disk. Exit code 0.'
+      ],
+      score: 12,
+      decision: "ALLOW",
+      decisionClass: "bg-[#3DDC97]/20 text-[#3DDC97]",
+      scoreColor: "text-[#3DDC97]",
+      barColor: "bg-[#3DDC97]",
+      statusDot: "bg-[#3DDC97]",
+      statusText: "ALLOWED (PASS)",
+      heuristics: [
+        { name: "Target Path", val: "./docs/README.md (Safe)", color: "text-emerald-400" },
+        { name: "Payload Pattern", val: "Markdown AST Only", color: "text-emerald-400" },
+        { name: "Elevated Privileges", val: "None Required", color: "text-white/70" }
+      ],
+      shake: false,
+      requiresApproval: false
+    },
+    2: {
+      title: "Bulk Rename",
+      consoleLines: [
+        '<span class="text-white/60">[PLAN]</span> Moving 48 files across directories...',
+        '<span class="text-amber-400 font-bold">[CAUTION]</span> Tool invocation: <span class="text-amber-300">mv ./assets/* ./archive/</span>',
+        '<span class="text-[#FFBD6B]">⚠ AgentGuard Trap: Mutation threshold exceeded (48 paths impacted).</span>',
+        '<span class="text-white/70">[PAUSED]</span> Pausing agent thread: Human-in-the-loop validation requested.'
+      ],
+      score: 54,
+      decision: "ASK (2FA)",
+      decisionClass: "bg-[#FFBD6B]/20 text-[#FFBD6B]",
+      scoreColor: "text-[#FFBD6B]",
+      barColor: "bg-[#FFBD6B]",
+      statusDot: "bg-[#FFBD6B]",
+      statusText: "AWAITING HUMAN APPROVAL",
+      heuristics: [
+        { name: "Affected Item Count", val: "48 files (Threshold: 10)", color: "text-[#FFBD6B]" },
+        { name: "Target Directory", val: "./assets/ (Non-critical)", color: "text-emerald-400" },
+        { name: "Human Review", val: "Dispatching Slack Ping...", color: "text-[#FFBD6B]" }
+      ],
+      shake: false,
+      requiresApproval: true
+    },
+    3: {
+      title: "Delete Project Folder",
+      consoleLines: [
+        '<span class="text-rose-400 font-bold">[CRITICAL ALERT]</span> Agent attempted recursive command:',
+        '<span class="text-rose-300 font-bold">bash_exec("rm -rf ./src/")</span>',
+        '<span class="text-[#FF1F6B] font-extrabold">⛔ AGENTGUARD HARD TRAP TRIGGERED (Severity: 92/100)</span>',
+        '<span class="text-[#FF1F6B]">Execution immediately terminated at kernel gateway.</span>',
+        '<span class="text-white/60">[CONTAINMENT]</span> Host file system untouched. Threat signature logged & quarantined.'
+      ],
+      score: 92,
+      decision: "BLOCK",
+      decisionClass: "bg-[#FF1F6B]/30 text-[#FF1F6B] border border-[#FF1F6B] font-extrabold animate-pulse",
+      scoreColor: "text-[#FF1F6B]",
+      barColor: "bg-[#FF1F6B]",
+      statusDot: "bg-[#FF1F6B]",
+      statusText: "THREAT CONTAINED",
+      heuristics: [
+        { name: "Command Severity", val: "RECURSIVE DELETION (rm -rf)", color: "text-[#FF1F6B]" },
+        { name: "Protected Target", val: "./src/ (Codebase Core)", color: "text-[#FF1F6B]" },
+        { name: "Enforcement", val: "SIGKILL to Agent Subprocess", color: "text-[#FF1F6B]" }
+      ],
+      shake: true,
+      requiresApproval: false
+    }
+  };
+
+  let currentScenarioId = 3;
+  let typeWriterTimeouts = [];
+
+  function runScenario(id) {
+    currentScenarioId = id;
+    const data = scenarios[id];
+    const demoContainer = document.getElementById('demoContainer');
+    const stamp = document.getElementById('blockedStamp');
+    const approvalArea = document.getElementById('interactiveApprovalArea');
+
+    typeWriterTimeouts.forEach(t => clearTimeout(t));
+    typeWriterTimeouts = [];
+
+    [1, 2, 3].forEach(btnIdx => {
+      const btn = document.getElementById(`scenarioBtn${btnIdx}`);
+      if (!btn) return;
+      if (btnIdx === id) {
+        btn.classList.add('ring-2', 'ring-white/40', 'scale-105');
+      } else {
+        btn.classList.remove('ring-2', 'ring-white/40', 'scale-105');
+      }
+    });
+
+    stamp.classList.add('hidden');
+    demoContainer.classList.remove('shake-active');
+
+    document.getElementById('demoStatusText').textContent = data.statusText;
+    document.getElementById('demoStatusDot').className = `w-2 h-2 rounded-full ${data.statusDot}`;
+    
+    for (let i = 1; i <= 5; i++) {
+      const stepEl = document.getElementById(`step${i}`);
+      if (i <= (id === 3 ? 4 : (id === 2 ? 3 : 5))) {
+        stepEl.className = "flex items-center gap-2 text-[#FF1F6B] font-bold";
+      } else {
+        stepEl.className = "flex items-center gap-2 text-white/40";
+      }
+    }
+
+    const consoleBox = document.getElementById('scenarioConsoleContent');
+    consoleBox.innerHTML = '';
+    
+    data.consoleLines.forEach((line, idx) => {
+      const timeout = setTimeout(() => {
+        const p = document.createElement('p');
+        p.className = "opacity-0 transition-opacity duration-300";
+        p.innerHTML = line;
+        consoleBox.appendChild(p);
+        requestAnimationFrame(() => p.classList.remove('opacity-0'));
+      }, idx * 220);
+      typeWriterTimeouts.push(timeout);
+    });
+
+    const scoreDisp = document.getElementById('threatScoreDisplay');
+    const bar = document.getElementById('threatProgressBar');
+    const pill = document.getElementById('decisionPill');
+
+    scoreDisp.textContent = `${data.score} / 100`;
+    scoreDisp.className = `font-extrabold text-lg ${data.scoreColor}`;
+    bar.style.width = `${data.score}%`;
+    bar.className = `h-full ${data.barColor} transition-all duration-700`;
+
+    pill.textContent = data.decision;
+    pill.className = `px-2.5 py-0.5 rounded text-[10px] font-mono font-bold ${data.decisionClass}`;
+
+    const hList = document.getElementById('heuristicsList');
+    hList.innerHTML = '';
+    data.heuristics.forEach(h => {
+      const item = document.createElement('div');
+      item.className = "p-2 rounded bg-white/[0.03] border border-white/[0.05] flex items-center justify-between";
+      item.innerHTML = `<span>${h.name}:</span><span class="${h.color} font-bold">${h.val}</span>`;
+      hList.appendChild(item);
+    });
+
+    if (data.requiresApproval) {
+      approvalArea.classList.remove('hidden');
+    } else {
+      approvalArea.classList.add('hidden');
+    }
+
+    if (data.shake) {
+      const shakeTimeout = setTimeout(() => {
+        demoContainer.classList.add('shake-active');
+        stamp.classList.remove('hidden');
+      }, 450);
+      typeWriterTimeouts.push(shakeTimeout);
+    }
+  }
+
+  function replayCurrentScenario() {
+    runScenario(currentScenarioId);
+  }
+
+  function approveAction() {
+    const consoleBox = document.getElementById('scenarioConsoleContent');
+    const p = document.createElement('p');
+    p.className = "text-[#3DDC97] font-bold mt-2 animate-pulse";
+    p.textContent = "✔ Operator approved execution via Authenticated Hook. Resuming agent.";
+    consoleBox.appendChild(p);
+    document.getElementById('interactiveApprovalArea').classList.add('hidden');
+    document.getElementById('decisionPill').textContent = "APPROVED BY OPERATOR";
+    document.getElementById('decisionPill').className = "px-2.5 py-0.5 rounded text-[10px] font-mono font-bold bg-[#3DDC97]/20 text-[#3DDC97]";
+  }
+
+  function denyAction() {
+    const consoleBox = document.getElementById('scenarioConsoleContent');
+    const p = document.createElement('p');
+    p.className = "text-[#FF1F6B] font-bold mt-2";
+    p.textContent = "⛔ Operator denied execution. Operation discarded safely.";
+    consoleBox.appendChild(p);
+    document.getElementById('interactiveApprovalArea').classList.add('hidden');
+    document.getElementById('decisionPill').textContent = "DENIED BY OPERATOR";
+    document.getElementById('decisionPill').className = "px-2.5 py-0.5 rounded text-[10px] font-mono font-bold bg-[#FF1F6B]/20 text-[#FF1F6B]";
+  }
+
+  function switchDashboardTab(tabName) {
+    const tabs = ['events', 'threats', 'policies', 'audit'];
+    tabs.forEach(t => {
+      const btn = document.getElementById(`tabBtn${t.charAt(0).toUpperCase() + t.slice(1)}`);
+      if (btn) {
+        if (t === tabName) {
+          btn.className = "text-white border-b-2 border-[#FF1F6B] pb-3 -mb-3 font-bold transition-colors";
+        } else {
+          btn.className = "text-white/50 hover:text-white transition-colors pb-3 -mb-3";
+        }
+      }
+    });
+
+    const container = document.getElementById('dashboardTabContent');
+    if (tabName === 'threats') {
+      container.innerHTML = `
+        <table class="w-full text-left text-xs font-mono">
+          <thead>
+            <tr class="text-white/40 border-b border-white/[0.06]">
+              <th class="pb-3 font-medium">Incident ID</th>
+              <th class="pb-3 font-medium">Agent</th>
+              <th class="pb-3 font-medium">Threat Vector</th>
+              <th class="pb-3 font-medium">Signature</th>
+              <th class="pb-3 font-medium">Quarantine Status</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-white/[0.04]">
+            <tr class="hover:bg-white/[0.02]">
+              <td class="py-3 text-[#FF1F6B]">#THREAT-8821</td>
+              <td class="py-3 text-cyan-300">agent-eval-loop</td>
+              <td class="py-3 text-white">Recursive FS Wiping (rm -rf)</td>
+              <td class="py-3 text-white/50">SIG_DESTRUCTIVE_UNLINK</td>
+              <td class="py-3"><span class="px-2 py-0.5 rounded text-[10px] bg-rose-500/20 text-rose-400 border border-rose-500/30">QUARANTINED</span></td>
+            </tr>
+            <tr class="hover:bg-white/[0.02]">
+              <td class="py-3 text-[#FF1F6B]">#THREAT-8819</td>
+              <td class="py-3 text-cyan-300">agent-auto-research</td>
+              <td class="py-3 text-white">Environment Credential Exfil</td>
+              <td class="py-3 text-white/50">SIG_SECRET_ENV_SCAN</td>
+              <td class="py-3"><span class="px-2 py-0.5 rounded text-[10px] bg-rose-500/20 text-rose-400 border border-rose-500/30">ISOLATED</span></td>
+            </tr>
+            <tr class="hover:bg-white/[0.02]">
+              <td class="py-3 text-[#FF1F6B]">#THREAT-8804</td>
+              <td class="py-3 text-cyan-300">agent-sql-assist</td>
+              <td class="py-3 text-white">Raw DROP TABLE Mutation</td>
+              <td class="py-3 text-white/50">SIG_SQL_SCHEMA_DROP</td>
+              <td class="py-3"><span class="px-2 py-0.5 rounded text-[10px] bg-rose-500/20 text-rose-400 border border-rose-500/30">QUARANTINED</span></td>
+            </tr>
+          </tbody>
+        </table>
+      `;
+    } else if (tabName === 'policies') {
+      container.innerHTML = `
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs font-mono">
+          <div class="p-3 rounded-lg bg-black/40 border border-white/10 flex justify-between items-center hover:border-white/20 transition-colors">
+            <div>
+              <div class="font-bold text-white">POL-01: Prohibit File Unlink in Root Scope</div>
+              <div class="text-[10px] text-white/50 mt-0.5">Enforcement: BLOCK · Target: /*, /app, ./src</div>
+            </div>
+            <span class="px-2 py-0.5 rounded text-[10px] bg-emerald-500/20 text-emerald-400">ACTIVE</span>
+          </div>
+          <div class="p-3 rounded-lg bg-black/40 border border-white/10 flex justify-between items-center hover:border-white/20 transition-colors">
+            <div>
+              <div class="font-bold text-white">POL-02: Require 2FA on Multi-File Moves (>10)</div>
+              <div class="text-[10px] text-white/50 mt-0.5">Enforcement: ASK · Target: Local Filesystem</div>
+            </div>
+            <span class="px-2 py-0.5 rounded text-[10px] bg-emerald-500/20 text-emerald-400">ACTIVE</span>
+          </div>
+        </div>
+      `;
+    } else if (tabName === 'audit') {
+      container.innerHTML = `
+        <div class="space-y-2 text-xs font-mono">
+          <div class="p-2.5 rounded bg-black/40 border border-white/10 flex items-center justify-between hover:border-emerald-500/30 transition-colors">
+            <span class="text-white/50">HASH: 0x9f4a...1c22</span>
+            <span class="text-white">SIG_ED25519 Verified</span>
+            <span class="text-emerald-400">Ledger Block #10294</span>
+            <span class="text-white/40">14:28:02 UTC</span>
+          </div>
+          <div class="p-2.5 rounded bg-black/40 border border-white/10 flex items-center justify-between hover:border-emerald-500/30 transition-colors">
+            <span class="text-white/50">HASH: 0x3d7b...4e19</span>
+            <span class="text-white">SIG_ED25519 Verified</span>
+            <span class="text-emerald-400">Ledger Block #10293</span>
+            <span class="text-white/40">14:27:49 UTC</span>
+          </div>
+        </div>
+      `;
+    } else {
+      container.innerHTML = `
+        <table class="w-full text-left text-xs font-mono">
+          <thead>
+            <tr class="text-white/40 border-b border-white/[0.06]">
+              <th class="pb-3 font-medium">Timestamp</th>
+              <th class="pb-3 font-medium">Agent ID</th>
+              <th class="pb-3 font-medium">Attempted Command / Tool</th>
+              <th class="pb-3 font-medium">Target Resource</th>
+              <th class="pb-3 font-medium">Risk Score</th>
+              <th class="pb-3 font-medium">Decision</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-white/[0.04]">
+            <tr class="hover:bg-white/[0.02]">
+              <td class="py-3 text-white/60">14:28:02.112</td>
+              <td class="py-3 text-cyan-300">agent-coder-9</td>
+              <td class="py-3 text-white font-medium">file_write</td>
+              <td class="py-3 text-[#B9A9B1]">./src/components/Header.tsx</td>
+              <td class="py-3"><span class="text-[#3DDC97]">14/100</span></td>
+              <td class="py-3"><span class="px-2 py-0.5 rounded text-[10px] bg-[#3DDC97]/15 text-[#3DDC97] border border-[#3DDC97]/30">ALLOW</span></td>
+            </tr>
+            <tr class="hover:bg-[#FF1F6B]/5">
+              <td class="py-3 text-white/60">14:26:11.450</td>
+              <td class="py-3 text-rose-300">agent-eval-loop</td>
+              <td class="py-3 text-[#FF1F6B] font-bold">bash_exec ("rm -rf /app/storage")</td>
+              <td class="py-3 text-[#FF1F6B]">/app/storage/*</td>
+              <td class="py-3"><span class="text-[#FF1F6B] font-bold">96/100</span></td>
+              <td class="py-3"><span class="px-2 py-0.5 rounded text-[10px] bg-[#FF1F6B]/20 text-[#FF1F6B] border border-[#FF1F6B]/50 font-bold animate-pulse">BLOCK</span></td>
+            </tr>
+          </tbody>
+        </table>
+      `;
+    }
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,172 @@
+[
+  {
+    "slide": 1,
+    "paragraphs": [
+      "AG / HACK-A-THRONE 2026",
+      "01 / 08",
+      "AI & INTELLIGENT SYSTEMS",
+      "AGENT",
+      "GUARD",
+      "Intelligent Runtime Security for Autonomous AI Agents",
+      "Let AI act. Keep humans in control.",
+      "HACK-A-THRONE 2026   /   CONCEPT PITCH",
+      "AG",
+      "AGENT",
+      "TOOLS",
+      "POLICY",
+      "HUMAN"
+    ]
+  },
+  {
+    "slide": 2,
+    "paragraphs": [
+      "AG / HACK-A-THRONE 2026",
+      "02 / 08",
+      "THE PROBLEM",
+      "AI agents can do more than users intended.",
+      "A capable agent with file, terminal and network access can accidentally cross critical boundaries.",
+      "01",
+      "Accidental damage",
+      "Mass file edits, destructive commands, unintended deletions or overwrites.",
+      "02",
+      "Sensitive access",
+      "Agents may open secrets, credentials or private folders beyond their assigned task.",
+      "03",
+      "Missing supervision",
+      "Traditional security tools cannot always understand agent intent or task context.",
+      "THE SECURITY GAP",
+      "Permission to run ≠ permission to do anything."
+    ]
+  },
+  {
+    "slide": 3,
+    "paragraphs": [
+      "AG / HACK-A-THRONE 2026",
+      "03 / 08",
+      "OUR SOLUTION",
+      "A security checkpoint between agents and actions.",
+      "AgentGuard evaluates every high-impact tool request before damage can happen.",
+      "AI AGENT",
+      "Task & intended goal",
+      "AGENTGUARD",
+      "Identity • Context • Risk",
+      "DECISION",
+      "Allow / Ask / Block",
+      "SYSTEM TOOLS",
+      "Files • Shell • Network",
+      "Design principle",
+      "Silent when safe. Explainable when risky. Protective when critical."
+    ]
+  },
+  {
+    "slide": 4,
+    "paragraphs": [
+      "AG / HACK-A-THRONE 2026",
+      "04 / 08",
+      "CORE INTELLIGENCE",
+      "Context-aware risk, not constant pop-ups.",
+      "Illustrative risk policies — numeric thresholds are configurable and require validation.",
+      "LOW RISK",
+      "0–29",
+      "ALLOW",
+      "Routine read/edit within approved workspace",
+      "MEDIUM RISK",
+      "30–69",
+      "ASK / WARN",
+      "Bulk actions, unusual files, scope drift",
+      "HIGH RISK",
+      "70–100",
+      "BLOCK / PAUSE",
+      "Destructive commands or credential exfiltration",
+      "Inputs: user instruction + agent identity + tool call + file sensitivity + behavior history + policy."
+    ]
+  },
+  {
+    "slide": 5,
+    "paragraphs": [
+      "AG / HACK-A-THRONE 2026",
+      "05 / 08",
+      "DIFFERENTIATION",
+      "Detect intent–action mismatch & anomalous behavior.",
+      "Combine transparent rules with contextual AI assistance, while keeping decisions auditable.",
+      "01",
+      "INTENT VS ACTION",
+      "An agent tasked to format reports attempts to delete a project folder.",
+      "02",
+      "BEHAVIOR BURSTS",
+      "Unusual volume of renames, writes or deletes in a short period.",
+      "03",
+      "SENSITIVE BOUNDARIES",
+      "Credential stores, personal files and out-of-scope paths receive stricter controls.",
+      "04",
+      "EXPLAINABLE EVENTS",
+      "Plain-English alert, affected resources, evidence and proposed next step."
+    ]
+  },
+  {
+    "slide": 6,
+    "paragraphs": [
+      "AG / HACK-A-THRONE 2026",
+      "06 / 08",
+      "TECHNICAL APPROACH",
+      "Modular architecture for a buildable MVP.",
+      "A controlled tool gateway can demonstrate enforcement before deeper OS-level integrations.",
+      "Agent / Task",
+      "Registered agent + user intent",
+      "Tool Gateway",
+      "Filesystem, shell, network wrappers",
+      "Risk Engine",
+      "Rules + context + anomaly signals",
+      "Policy Decision",
+      "Allow, request approval or block",
+      "LOGGING & UI",
+      "Event timeline   •   Threat dashboard   •   Policies   •   Approval prompts   •   Audit reports",
+      "PROPOSED STACK",
+      "React + TypeScript  /  FastAPI + Python  /  Rules + optional LLM  /  SQLite  /  REST"
+    ]
+  },
+  {
+    "slide": 7,
+    "paragraphs": [
+      "AG / HACK-A-THRONE 2026",
+      "07 / 08",
+      "DEMO WALKTHROUGH",
+      "A file-deletion attempt becomes a controlled decision.",
+      "Illustrative hackathon demo flow (not a claim of already deployed OS-wide monitoring).",
+      "1",
+      "TASK",
+      "Organize project assets in /workspace",
+      "2",
+      "ACTION",
+      "Agent requests recursive deletion",
+      "3",
+      "DETECT",
+      "Mismatch + bulk deletion + protected path",
+      "4",
+      "RESPOND",
+      "Block operation; show concise explanation",
+      "5",
+      "REVIEW",
+      "User views event and adjusts policy"
+    ]
+  },
+  {
+    "slide": 8,
+    "paragraphs": [
+      "AG / HACK-A-THRONE 2026",
+      "08 / 08",
+      "IMPACT & NEXT STEPS",
+      "Trustworthy autonomy needs a safety layer.",
+      "AgentGuard is designed as a product-oriented security platform, starting with a verifiable MVP.",
+      "For individuals",
+      "Fewer irreversible agent mistakes and clearer control over sensitive actions.",
+      "For teams",
+      "Consistent agent policies, explainable incident trails and safer experimentation.",
+      "For the ecosystem",
+      "A path toward safer agent adoption as tool access and autonomy expand.",
+      "MVP ROADMAP",
+      "Tool gateway  →  Risk policies  →  Live alerts  →  Incident replay  →  Broader integrations",
+      "AGENTGUARD  /  LET AI ACT. KEEP HUMANS IN CONTROL."
+    ]
+  }
+]
