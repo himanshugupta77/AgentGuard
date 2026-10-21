@@ -10,7 +10,7 @@ import {
   EvaluationResponse
 } from '../types'
 
-const API_BASE = '/api'
+const API_BASE = 'https://agentguard-backend-a71h.onrender.com'
 
 export async function fetchStats(): Promise<StatsSummary> {
   try {
